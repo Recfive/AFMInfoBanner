@@ -21,5 +21,5 @@ Pod::Spec.new do |s|
 
   s.source_files = 'Pod/Classes'
   s.frameworks = 'UIKit'
-  s.dependency 'CVKHierarchySearcher', '~> 0.2'
+  s.dependency 'CVKHierarchySearcher', :git => "https://github.com/Recfive/CVKHierarchySearcher.git", :commit => "d005f16adbacc6074d92aea788939550da0d1f8d"
 end

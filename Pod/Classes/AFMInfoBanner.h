@@ -33,6 +33,8 @@ typedef NS_ENUM(NSUInteger, AFMInfoBannerStyle) {
 @property (nonatomic) UIColor *customBackgroundColor;
 @property (nonatomic) UIColor *customTextColor;
 
+@property (nonatomic, copy) void (^appExtensionSetupBlock)(AFMInfoBanner *banner);
+
 - (id)initWithTargetView:(UIView *)targetView
          viewAboveBanner:(UIView *)viewAboveBanner
     additionalTopSpacing:(CGFloat)additionalTopSpacing;
@@ -52,5 +54,7 @@ typedef NS_ENUM(NSUInteger, AFMInfoBannerStyle) {
 + (instancetype)showAndHideWithText:(NSString *)text
                               style:(AFMInfoBannerStyle)style;
 + (void)hideAll;
+
++ (void)updateAllConstraintsInView:(UIView *)view;
 
 @end

@@ -235,6 +235,10 @@ static const CGFloat kDefaultHideInterval = 2.0;
 {
     [super updateConstraints];
 
+#ifdef AFM_IS_APP_EXTENSION
+    self.additionalTopSpacing = ((id<UILayoutSupport>)self.superview.layoutGuides.firstObject).length;
+#endif
+    
     self.topMarginConstraint.constant = kMargin + self.additionalTopSpacing;
     self.topSpacingConstraint.constant = 0;
 
@@ -361,7 +365,12 @@ static const CGFloat kDefaultHideInterval = 2.0;
         if (navVC && navVC.navigationBar.superview && !navVC.navigationBar.translucent) {
             [self setupViewsForNavigationBar:navVC.navigationBar];
         } else {
+#ifndef AFM_IS_APP_EXTENSION
             [self setupViewsToShowInWindow];
+#else
+            self.additionalTopSpacing = topmostVC.topLayoutGuide.length;
+            self.targetView = topmostVC.view;
+#endif
         }
     }
 }
@@ -374,6 +383,7 @@ static const CGFloat kDefaultHideInterval = 2.0;
 
 - (void)setupViewsToShowInWindow
 {
+    #ifndef AFM_IS_APP_EXTENSION
     // If there isn't a navigation controller with a bar, show in window instead.
     UIWindow *window = [[UIApplication sharedApplication] keyWindow];
     CGRect statusBarFrame = [[UIApplication sharedApplication] statusBarFrame];
@@ -382,6 +392,13 @@ static const CGFloat kDefaultHideInterval = 2.0;
 
     self.additionalTopSpacing = statusBarHeight;
     self.targetView = window;
+    #else
+    if (self.appExtensionSetupBlock)
+    {
+        __weak AFMInfoBanner *weakSelf = self;
+        self.appExtensionSetupBlock(weakSelf);
+    }
+    #endif
 }
 
 - (void)hide
@@ -449,8 +466,12 @@ static const CGFloat kDefaultHideInterval = 2.0;
 {
     UINavigationController *navVC = [[[CVKHierarchySearcher alloc] init] topmostNavigationController];
     [self hideAllInView:navVC.navigationBar.superview];
+#ifndef AFM_IS_APP_EXTENSION
     UIWindow *window = [[UIApplication sharedApplication] keyWindow];
     [self hideAllInView:window];
+#else
+    [self hideAllInView:[[[CVKHierarchySearcher alloc] init] topmostViewController].view];
+#endif
 }
 
 + (void)hideAllInView:(UIView *)view
@@ -458,6 +479,15 @@ static const CGFloat kDefaultHideInterval = 2.0;
     for (AFMInfoBanner *subview in view.subviews) {
         if ([subview isKindOfClass:[self class]]) {
             [subview hide:NO];
+        }
+    }
+}
+
++ (void)updateAllConstraintsInView:(UIView *)view
+{
+    for (AFMInfoBanner *subview in view.subviews) {
+        if ([subview isKindOfClass:[self class]]) {
+            [subview setNeedsUpdateConstraints];
         }
     }
 }
